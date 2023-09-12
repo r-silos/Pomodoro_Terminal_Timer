@@ -2,12 +2,18 @@ import time
 import sys
 from colorama import just_fix_windows_console
 import winsound
+import os
+import sysconfig
 
 # total number of slots in prog bar that can be bars xor blank spaces
 NUM_OF_PROG_SLOTS = 60
+WIDTH_OF_MAX_TERMINAL = 132
+
+# needed to allow ansi commands to work across multiple systems
+just_fix_windows_console()
 
 
-def timer(pomodoro_length=25, pomodoro_completed=0):
+def timer(pomodoro_length=25, pomodoro_completed=0, is_work_timer=True):
     """Timer function used to count down from default time of 25 minutes"""
 
     # MAX_TIME is a constant used keep track of total amt of time timer runs for
@@ -23,16 +29,19 @@ def timer(pomodoro_length=25, pomodoro_completed=0):
         clear_terminal_text()
         minutes, seconds = divmod(time_countdown, 60)
         timer = "{:02d}:{:02d}".format(minutes, seconds)
-        timer_revised = timer.center(120, " ")
+        timer_revised = timer.center(WIDTH_OF_MAX_TERMINAL, " ")
         prog_bar = progress_bar(MAX_TIME, time_countdown, TIME_UNTIL_NEXT_BAR)
-        prog_bar_revised = prog_bar.center(120, " ")
+        prog_bar_revised = prog_bar.center(WIDTH_OF_MAX_TERMINAL, " ")
         print(timer_revised, "\n", prog_bar_revised)
-
-        # print(prog_bar, end="\r")
         time.sleep(1)
         time_countdown -= 1
+    if is_work_timer:
+        print(
+            "Pomodoro Done. You have completed {} pomodoros".format(pomodoro_completed)
+        )
+    else:
+        print("Break Time over! Back to work")
     winsound.PlaySound("gba_noise.wav", 0)
-    print("Pomodoro Done. You have completed {} pomodoros".format(pomodoro_completed))
 
 
 def progress_bar(total_time, seconds_remaining, bar_time):
@@ -55,8 +64,7 @@ def clear_terminal_text(lines_to_clear=2):
 
 
 def main():
-    just_fix_windows_console()
-    timer(1)
+    timer(1, 0, False)
 
 
 main()
